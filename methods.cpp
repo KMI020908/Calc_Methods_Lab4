@@ -1367,13 +1367,14 @@ const std::vector<Type> &firstVec, std::vector<Type> &solution, std::vector<Type
 
 // Лаба 3
 template <typename Type>
-Type findEigenNumsQRMethodClassic(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy){
+std::size_t findEigenNumsQRMethodClassic(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy){
+    std::size_t numOfIters = 0; // Количество итераций
     std::size_t rows = matrix.size();
     std::size_t cols = 0;
     if (rows != 0)
         cols = matrix[0].size();
     else
-        return 0.0; //////////////////
+        return numOfIters; 
     eigenList.resize(rows, 0.0);
     std::size_t eigenRow = rows - 1; // Строка в которой по итогу вращений должно получиться собственное значение
     std::vector<std::vector<Type>> Q;
@@ -1388,6 +1389,7 @@ Type findEigenNumsQRMethodClassic(std::vector<std::vector<Type>> &matrix, std::v
     std::string IN_FILE_PATH_6 = "D:\\Calc_Methods\\Lab3\\Tests\\test6.txt";
     ///////////////////////////////////////////////////////////////////////////////
     while (eigenRow != 0){
+        numOfIters++;
         ///////////////////////////////////////////////////
         writeMatrixFile(matrix, IN_FILE_PATH_4);
         ///////////////////////////////////////////////////
@@ -1419,15 +1421,10 @@ Type findEigenNumsQRMethodClassic(std::vector<std::vector<Type>> &matrix, std::v
             for (std::size_t i = 0; i < eigenRow; i++){
                 Q[i].resize(eigenRow);
                 R[i].resize(eigenRow);
-                matrix[i].resize(eigenRow);
             }
             Q.resize(eigenRow);
             R.resize(eigenRow);
-            matrix.resize(eigenRow);
             eigenRow--;
-            //////////////////////////////////////////////
-            //std::cout << eigenList << '\n' << '\n';
-            //////////////////////////////////////////////
             rows--;
             cols--;
         }
@@ -1436,6 +1433,83 @@ Type findEigenNumsQRMethodClassic(std::vector<std::vector<Type>> &matrix, std::v
             break;
         }
     }
-    //std::cout << eigenList << '\n' << '\n';
-    return 1.0;
+    return numOfIters;
+}
+
+template <typename Type>
+std::size_t findEigenNumsQRMethodShift(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy){
+    std::size_t numOfIters = 0; // Количество итераций
+    std::size_t rows = matrix.size();
+    std::size_t cols = 0;
+    if (rows != 0)
+        cols = matrix[0].size();
+    else
+        return numOfIters; //////////////////
+    eigenList.resize(rows, 0.0);
+    std::size_t eigenRow = rows - 1; // Строка в которой по итогу вращений должно получиться собственное значение
+    std::vector<std::vector<Type>> Q;
+    std::vector<std::vector<Type>> R;
+    R.resize(rows);
+    for (std::size_t i = 0; i < rows; i++){
+        R[i].resize(cols, 0.0);
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    std::string IN_FILE_PATH_4 = "D:\\Calc_Methods\\Lab3\\Tests\\test4.txt";
+    std::string IN_FILE_PATH_5 = "D:\\Calc_Methods\\Lab3\\Tests\\test5.txt";
+    std::string IN_FILE_PATH_6 = "D:\\Calc_Methods\\Lab3\\Tests\\test6.txt";
+    ///////////////////////////////////////////////////////////////////////////////
+    while (eigenRow != 0){
+        numOfIters++;
+        ///////////////////////////////////////////////////        
+        writeMatrixFile(matrix, IN_FILE_PATH_4);
+        ///////////////////////////////////////////////////
+        // Сдвиг
+        Type shift = matrix[eigenRow][eigenRow];
+        for (std::size_t i = 0; i < rows; i++){
+            matrix[i][i] -= shift; 
+        }
+        for (std::size_t i = 0; i < rows; i++){
+            for (std::size_t j = 0; j < cols; j++){
+                R[i][j] = matrix[i][j];
+            }
+        }
+        findQMatrix(R, Q, accuracy);
+        ///////////////////////////////////////////////////////////
+        writeMatrixFile(Q, IN_FILE_PATH_5);
+        writeMatrixFile(R, IN_FILE_PATH_6);
+        //////////////////////////////////////////////////////////
+        for (std::size_t i = 0; i < rows; i++){
+            for (std::size_t j = 0; j < cols; j++){
+                Type sum = 0.0;
+                for (std::size_t k = i; k < rows; k++){
+                    sum += R[i][k] * Q[k][j];
+                }
+                matrix[i][j] = sum;
+            }
+        }
+        for (std::size_t i = 0; i < rows; i++){
+            matrix[i][i] += shift; 
+        }
+        Type sumOfEigenRow = 0.0;
+        for (std::size_t j = 0; j < eigenRow; j++){
+            sumOfEigenRow += std::abs(matrix[eigenRow][j]);
+        }
+        if (sumOfEigenRow < accuracy){
+            eigenList[eigenRow] = matrix[eigenRow][eigenRow]; 
+            for (std::size_t i = 0; i < eigenRow; i++){
+                Q[i].resize(eigenRow);
+                R[i].resize(eigenRow);
+            }
+            Q.resize(eigenRow);
+            R.resize(eigenRow);
+            eigenRow--;
+            rows--;
+            cols--;
+        }
+        if (eigenRow == 0){
+            eigenList[eigenRow] = matrix[eigenRow][eigenRow];
+            break;
+        }
+    }
+    return numOfIters;
 }

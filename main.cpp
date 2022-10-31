@@ -19,9 +19,12 @@ void temp_main(){
 
     std::vector<std::vector<Type>> A; // Матрица левых коэффициентов
     std::vector<Type> b; // Вектор правых коэффициентов
-    readData(A, b, IN_FILE_PATH_3);
     std::vector<Type> eigList;
-    findEigenNumsQRMethodClassic(A, eigList, 1e-6);
+    readData(A, b, IN_FILE_PATH_1);
+    std::cout << findEigenNumsQRMethodClassic(A, eigList, 1e-6) << '\n';
+    std::cout << eigList << '\n';
+    readData(A, b, IN_FILE_PATH_1);
+    std::cout << findEigenNumsQRMethodShift(A, eigList, 1e-6) << '\n';
     std::cout << eigList << '\n';
 }
 
