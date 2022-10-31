@@ -164,47 +164,29 @@ FILE_FLAG writeQRMatrix(const std::vector<std::vector<Type>> &Q, const std::vect
 }
 
 template<typename Type>
-FILE_FLAG writeMatrixMultiplyInvA(const std::vector<std::vector<Type>> &B, const std::vector<std::vector<Type>> &A, const std::string& OUT_FILE_PATH, 
-const std::string &text){
-    if (B.size() == 0 || A.size() == 0)
-        return NOT_OPEN;
+FILE_FLAG writeMatrixFile(const std::vector<std::vector<Type>> &matrix, const std::string& OUT_FILE_PATH, bool add){
     std::ofstream file;
-	file.open(OUT_FILE_PATH, std::ios::app);
-	if (!file.is_open())
-		exit(NOT_OPEN);
-    std::size_t dimMatrix = A.size();
-    file << '\n' << '\n';
-    file << "Multiplication of invert A and original A " << text << ':' << '\n';
-    for (std::size_t i = 0; i < dimMatrix; i++){
-        for (std::size_t j = 0; j < dimMatrix; j++){
-            Type sum = 0;
-            for (std::size_t k = 0; k < dimMatrix; k++){
-                sum += B[i][k]*A[k][j];
-            }
-            file << sum << '\t';
-        }
-        file << '\n';
+	if (add){
+        file.open(OUT_FILE_PATH, std::ios::app);
+        file << '\n' << '\n';
     }
-    file.close();
-    return IS_CLOSED;
-} 
-
-template<typename Type>
-FILE_FLAG writeMatrixMultiplyQR(const std::vector<std::vector<Type>> &B, const std::vector<std::vector<Type>> &A, const std::string& OUT_FILE_PATH){
-    std::ofstream file;
-	file.open(OUT_FILE_PATH, std::ios::app);
+    else{
+        file.open(OUT_FILE_PATH);
+    }
 	if (!file.is_open())
 		exit(NOT_OPEN);
-    std::size_t dimMatrix = A.size();
-    file << '\n' << '\n';
-    file << "Multiplication of Q and R:" << '\n';
-    for (std::size_t i = 0; i < dimMatrix; i++){
-        for (std::size_t j = 0; j < dimMatrix; j++){
-            Type sum = 0;
-            for (std::size_t k = 0; k < dimMatrix; k++){
-                sum += B[i][k]*A[k][j];
-            }
-            file << sum << '\t';
+    std::size_t rows = matrix.size();
+    std::size_t cols = 0;
+    if (rows != 0){
+        cols = matrix[0].size();
+    }
+    else{
+        file.close();
+        return IS_CLOSED;
+    }
+    for (std::size_t i = 0; i < rows; i++){
+        for (std::size_t j = 0; j < cols; j++){
+            file << matrix[i][j] << '\t';
         }
         file << '\n';
     }
@@ -460,3 +442,6 @@ FILE_FLAG writeNormErrAfterEstIt(Type normErr, const std::string& OUT_FILE_PATH)
 	file.close();
 	return IS_CLOSED;
 }
+
+
+

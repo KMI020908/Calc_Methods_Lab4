@@ -145,13 +145,13 @@ SOLUTION_FLAG qrMethod(std::vector<std::vector<Type>> &lCoefs, std::vector<Type>
     for (std::size_t k = 0; k < rows; k++){
         for (std::size_t i = k + 1; i < rows; i++){
             if (std::abs(lCoefs[i][k]) >= accuracy){
-                Type c = lCoefs[k][k]/sqrt(lCoefs[k][k]*lCoefs[k][k] + lCoefs[i][k]*lCoefs[i][k]);
-                Type s = lCoefs[i][k]/sqrt(lCoefs[k][k]*lCoefs[k][k] + lCoefs[i][k]*lCoefs[i][k]);
+                Type c = lCoefs[k][k]/std::sqrt(lCoefs[k][k]*lCoefs[k][k] + lCoefs[i][k]*lCoefs[i][k]);
+                Type s = lCoefs[i][k]/std::sqrt(lCoefs[k][k]*lCoefs[k][k] + lCoefs[i][k]*lCoefs[i][k]);
                 for (std::size_t j = k; j < cols; j++){
                     Type temp = lCoefs[k][j];
-                    lCoefs[k][j] = c*lCoefs[k][j] + s*lCoefs[i][j];
-                    lCoefs[i][j] = -s*temp + c*lCoefs[i][j];
-                    if (std::abs(lCoefs[i][j]) < std::numeric_limits<Type>::epsilon())
+                    lCoefs[k][j] = c * lCoefs[k][j] + s * lCoefs[i][j];
+                    lCoefs[i][j] = -s * temp + c * lCoefs[i][j];
+                    if (std::abs(lCoefs[i][j]) < accuracy)
                         lCoefs[i][j] = 0;
                 }
                 Type temp = rCoefs[k];
@@ -186,29 +186,32 @@ QUADRATIC_FLAG findQMatrix(std::vector<std::vector<Type>> &lCoefs, std::vector<s
         return NOT_QUADRATIC;
     Q.resize(rows);
     for (std::size_t i = 0; i < rows; i++){
-        Q[i].resize(cols, 0);
+        Q[i].resize(cols);
+        for (std::size_t j = 0; j < cols; j++){
+            Q[i][j] = 0.0;   
+        }
     }
     for (std::size_t i = 0; i < rows; i++){
-        Q[i][i] = 1;
+        Q[i][i] = 1.0;
     }
     for (std::size_t k = 0; k < rows; k++){
         for (std::size_t i = k + 1; i < rows; i++){
             if (std::abs(lCoefs[i][k]) >= accuracy){
-                Type c = lCoefs[k][k]/sqrt(lCoefs[k][k]*lCoefs[k][k] + lCoefs[i][k]*lCoefs[i][k]);
-                Type s = lCoefs[i][k]/sqrt(lCoefs[k][k]*lCoefs[k][k] + lCoefs[i][k]*lCoefs[i][k]);
+                Type c = lCoefs[k][k]/std::sqrt(lCoefs[k][k] * lCoefs[k][k] + lCoefs[i][k] * lCoefs[i][k]);
+                Type s = lCoefs[i][k]/std::sqrt(lCoefs[k][k] * lCoefs[k][k] + lCoefs[i][k] * lCoefs[i][k]);
                 for (std::size_t j = 0; j < cols; j++){
                     Type temp = Q[k][j];
-                    Q[k][j] = c*Q[k][j] + s*Q[i][j];
-                    Q[i][j] = -s*temp + c*Q[i][j];
+                    Q[k][j] = c * Q[k][j] + s * Q[i][j];
+                    Q[i][j] = -s * temp + c * Q[i][j];
                     if (std::abs(Q[i][j]) < accuracy)
-                        Q[i][j] = 0;
+                        Q[i][j] = 0.0;
                 }
                 for (std::size_t j = k; j < cols; j++){
                     Type temp = lCoefs[k][j];
-                    lCoefs[k][j] = c*lCoefs[k][j] + s*lCoefs[i][j];
-                    lCoefs[i][j] = -s*temp + c*lCoefs[i][j];
+                    lCoefs[k][j] = c * lCoefs[k][j] + s * lCoefs[i][j];
+                    lCoefs[i][j] = -s * temp + c * lCoefs[i][j];
                     if (std::abs(lCoefs[i][j]) < accuracy)
-                        lCoefs[i][j] = 0;
+                        lCoefs[i][j] = 0.0;
                 }
             }
         }
@@ -562,40 +565,6 @@ Type findLowerBoundOfcondInf(std::vector<std::vector<Type>> &lCoefs, std::vector
         lowerBound = bound;
     
     return lowerBound;
-}
-
-template<typename Type>
-MULTIPLIED_FLAG multiplyMatrix(std::vector<std::vector<Type>> &matrix1, const std::vector<std::vector<Type>> &matrix2, std::vector<std::vector<Type>> &result){
-    std::size_t rows1 = matrix1.size();
-    std::size_t cols1 = 0;
-    if (rows1 != 0)
-        cols1 = matrix1[0].size();
-    else
-        return NOT_MULTIPLIED;
-    std::size_t rows2 = matrix2.size();
-    std::size_t cols2 = 0;
-    if (rows2 != 0)
-        cols2 = matrix2[0].size();
-    else
-        return NOT_MULTIPLIED;
-    if (cols1 != rows2)
-        return NOT_MULTIPLIED;
-    result.resize(rows1);
-    for (std::size_t i = 0; i < rows1; i++){
-        result[i].resize(cols2);
-    }
-    std::size_t rows = result.size();
-    std::size_t cols = result[0].size();
-    for (std::size_t  i = 0; i < rows; i++){
-        for (std::size_t  j = 0; j < cols; j++){
-            Type sum = 0.0;
-            for (std::size_t  k = 0; k < cols1; k++){
-                sum += matrix1[i][k] * matrix2[k][j];
-            }
-            result[i][j] = sum;
-        }
-    }
-    return IS_MULTIPLIED;
 }
 
 template<typename Type>
@@ -1406,44 +1375,67 @@ Type findEigenNumsQRMethodClassic(std::vector<std::vector<Type>> &matrix, std::v
     else
         return 0.0; //////////////////
     eigenList.resize(rows, 0.0);
+    std::size_t eigenRow = rows - 1; // Строка в которой по итогу вращений должно получиться собственное значение
     std::vector<std::vector<Type>> Q;
-    while (true){
-        findQMatrix(matrix, Q, accuracy);
+    std::vector<std::vector<Type>> R;
+    R.resize(rows);
+    for (std::size_t i = 0; i < rows; i++){
+        R[i].resize(cols, 0.0);
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    std::string IN_FILE_PATH_4 = "D:\\Calc_Methods\\Lab3\\Tests\\test4.txt";
+    std::string IN_FILE_PATH_5 = "D:\\Calc_Methods\\Lab3\\Tests\\test5.txt";
+    std::string IN_FILE_PATH_6 = "D:\\Calc_Methods\\Lab3\\Tests\\test6.txt";
+    ///////////////////////////////////////////////////////////////////////////////
+    while (eigenRow != 0){
+        ///////////////////////////////////////////////////
+        writeMatrixFile(matrix, IN_FILE_PATH_4);
+        ///////////////////////////////////////////////////
+        for (std::size_t i = 0; i < rows; i++){
+            for (std::size_t j = 0; j < cols; j++){
+                R[i][j] = matrix[i][j];
+            }
+        }
+        findQMatrix(R, Q, accuracy);
+        ///////////////////////////////////////////////////////////
+        writeMatrixFile(Q, IN_FILE_PATH_5);
+        writeMatrixFile(R, IN_FILE_PATH_6);
+        //////////////////////////////////////////////////////////
         for (std::size_t i = 0; i < rows; i++){
             for (std::size_t j = 0; j < cols; j++){
                 Type sum = 0.0;
                 for (std::size_t k = i; k < rows; k++){
-                    sum += matrix[i][k] * Q[k][j];
+                    sum += R[i][k] * Q[k][j];
                 }
                 matrix[i][j] = sum;
             }
         }
-        //multiplyMatrix(matrix, Q, matrix);
-        //std::cout <<  matrix;
-        //std::cout << '\n' << '\n' << '\n';
-        bool flag = false;
-        for (std::size_t i = 0; i < rows; i++){
-            for (std::size_t j = 0; j < i; j++){
-                if (std::abs(matrix[i][j]) > accuracy){
-                    flag = true;
-                    break;
-                    
-                }
-            }
-            if (flag){
-                break;
-            }
+        Type sumOfEigenRow = 0.0;
+        for (std::size_t j = 0; j < eigenRow; j++){
+            sumOfEigenRow += std::abs(matrix[eigenRow][j]);
         }
-        if (!flag){
+        if (sumOfEigenRow < accuracy){
+            eigenList[eigenRow] = matrix[eigenRow][eigenRow]; 
+            for (std::size_t i = 0; i < eigenRow; i++){
+                Q[i].resize(eigenRow);
+                R[i].resize(eigenRow);
+                matrix[i].resize(eigenRow);
+            }
+            Q.resize(eigenRow);
+            R.resize(eigenRow);
+            matrix.resize(eigenRow);
+            eigenRow--;
+            //////////////////////////////////////////////
+            //std::cout << eigenList << '\n' << '\n';
+            //////////////////////////////////////////////
+            rows--;
+            cols--;
+        }
+        if (eigenRow == 0){
+            eigenList[eigenRow] = matrix[eigenRow][eigenRow];
             break;
         }
-        for (std::size_t i = 0; i < rows; i++){
-            eigenList[i] = matrix[i][i];
-        }
-        std::cout << eigenList << '\n' << '\n';
     }
-    for (std::size_t i = 0; i < rows; i++){
-        eigenList[i] = matrix[i][i];
-    }
+    //std::cout << eigenList << '\n' << '\n';
     return 1.0;
 }
