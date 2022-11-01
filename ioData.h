@@ -74,4 +74,8 @@ template<typename Type>
 FILE_FLAG writeEigenData(std::size_t numOfIterations, std::vector<Type> &eigList, std::string& OUT_FILE_PATH, 
 bool hasShift = false, bool makeHessenberg = false, bool add = false);
 
+template<typename Type>
+FILE_FLAG writeEigenVec(std::vector<std::vector<Type>> &eigMatrix, std::vector<Type> &eigList, const std::string& OUT_FILE_PATH, 
+bool add = false);
+
 #endif

@@ -1440,7 +1440,7 @@ std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::v
     if (rows != 0)
         cols = matrix[0].size();
     else
-        return numOfIters; //////////////////
+        return numOfIters;
     eigenList.resize(rows, 0.0);
     std::size_t eigenRow = rows - 1; // Строка в которой по итогу вращений должно получиться собственное значение
     std::vector<std::vector<Type>> Q;
@@ -1449,16 +1449,8 @@ std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::v
     for (std::size_t i = 0; i < rows; i++){
         R[i].resize(cols, 0.0);
     }
-    ///////////////////////////////////////////////////////////////////////////////
-    std::string IN_FILE_PATH_4 = "D:\\Calc_Methods\\Lab3\\Tests\\test4.txt";
-    std::string IN_FILE_PATH_5 = "D:\\Calc_Methods\\Lab3\\Tests\\test5.txt";
-    std::string IN_FILE_PATH_6 = "D:\\Calc_Methods\\Lab3\\Tests\\test6.txt";
-    ///////////////////////////////////////////////////////////////////////////////
     while (eigenRow != 0){
         numOfIters++;
-        ///////////////////////////////////////////////////        
-        writeMatrixFile(matrix, IN_FILE_PATH_4);
-        ///////////////////////////////////////////////////
         // Сдвиг
         if (hasShift){
             shift = matrix[eigenRow][eigenRow];
@@ -1472,10 +1464,6 @@ std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::v
             }
         }
         findQMatrix(R, Q, accuracy);
-        ///////////////////////////////////////////////////////////
-        writeMatrixFile(Q, IN_FILE_PATH_5);
-        writeMatrixFile(R, IN_FILE_PATH_6);
-        //////////////////////////////////////////////////////////
         for (std::size_t i = 0; i < rows; i++){
             for (std::size_t j = 0; j < cols; j++){
                 Type sum = 0.0;
@@ -1615,11 +1603,7 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
                 matrix[i][i] += shift; 
             }
         }
-        Type sumOfEigenRow = 0.0;
-        for (std::size_t j = 0; j < eigenRow; j++){
-            sumOfEigenRow += std::abs(matrix[eigenRow][j]);
-        }
-        if (sumOfEigenRow < accuracy){
+        if (std::abs(matrix[eigenRow][eigenRow - 1]) < accuracy){
             eigenList[eigenRow] = matrix[eigenRow][eigenRow]; 
             for (std::size_t i = 0; i < eigenRow; i++){
                 Q[i].resize(eigenRow);
@@ -1635,6 +1619,51 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
             eigenList[eigenRow] = matrix[eigenRow][eigenRow];
             break;
         }
+    }
+    return numOfIters;
+}
+
+template<typename Type>
+std::size_t invertItersMethod(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &eigenMatrix, const std::vector<Type> &startEigenList,
+Type accuracy, Type omega){
+    std::size_t numOfIters = 0; // Количество итераций
+    std::size_t rows = matrix.size();
+    std::size_t cols = 0;
+    if (rows != 0)
+        cols = matrix[0].size();
+    else
+        return numOfIters;
+    eigenMatrix.clear();
+    std::vector<Type> prevEigenVec(rows);
+    std::vector<Type> eigenVec(rows);
+    std::vector<std::vector<Type>> lambdaMatrix(rows);
+    for (std::size_t i = 0; i < cols; i++){
+        lambdaMatrix[i].resize(cols, 0.0);
+        for (std::size_t j = 0; j < cols; j++){
+            lambdaMatrix[i][j] = matrix[i][j];
+        }  
+    }
+    std::vector<Type> startPoint(rows, 0.0);
+    for (std::size_t i = 0; i < rows; i++){
+        eigenVec[0] = 1.0;
+        for (std::size_t k = 1; k < rows; k++){
+            eigenVec[k] = 0.0;
+        }
+        for (std::size_t k = 0; k < rows; k++){
+            lambdaMatrix[k][k] = matrix[k][k] - startEigenList[i];
+        }
+        while (normOfVector(eigenVec - prevEigenVec) > accuracy && normOfVector(eigenVec + prevEigenVec) > accuracy){
+            for (std::size_t k = 0; k < rows; k++){
+                prevEigenVec[k] = eigenVec[k];
+            }
+            relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
+            Type normOfEigVec = normOfVector(eigenVec);
+            for (std::size_t k = 0; k < rows; k++){
+                eigenVec[k] /= normOfEigVec;
+            }
+            numOfIters++;
+        }
+        eigenMatrix.push_back(eigenVec);
     }
     return numOfIters;
 }

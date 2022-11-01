@@ -505,4 +505,24 @@ bool hasShift, bool makeHessenberg, bool add){
 	return IS_CLOSED;
 }
 
+template<typename Type>
+FILE_FLAG writeEigenVec(std::vector<std::vector<Type>> &eigMatrix, std::vector<Type> &eigList, const std::string& OUT_FILE_PATH, 
+bool add){
+	std::ofstream file;
+    if (add){
+        file.open(OUT_FILE_PATH, std::ios::app);
+        file << '\n' << '\n';
+    }
+    else{
+        file.open(OUT_FILE_PATH);
+    }
+	if (!file.is_open())
+		exit(NOT_OPEN); 
+    std::size_t rows = eigMatrix.size();
+    for (std::size_t i = 0; i < rows; i++){
+        file << "Eigen number: " << eigList[i] << " ----> " << "Eigen vector: " << eigMatrix[i] << '\n' << '\n';
+    }
+	file.close();
+	return IS_CLOSED;
+}
 

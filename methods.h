@@ -161,6 +161,11 @@ std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::v
 template <typename Type>
 QUADRATIC_FLAG getHessenbergMatrix(std::vector<std::vector<Type>> &matrix, Type accuracy = 1e-6, bool isSymmetric = false);
 
+template<typename Type>
+std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift);
 
+template<typename Type>
+std::size_t invertItersMethod(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &eigenMatrix, const std::vector<Type> &startEigenList,
+Type accuracy = 1e-6, Type omega = 1.0);
 
 #endif
