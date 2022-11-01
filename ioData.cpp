@@ -467,5 +467,42 @@ FILE_FLAG writeNormErrAfterEstIt(Type normErr, const std::string& OUT_FILE_PATH)
 	return IS_CLOSED;
 }
 
+// Лаба 3
+template<typename Type>
+FILE_FLAG writeEigenData(std::size_t numOfIterations, std::vector<Type> &eigList, const std::string& OUT_FILE_PATH, 
+bool hasShift, bool makeHessenberg, bool add){
+	std::ofstream file;
+    if (add){
+        file.open(OUT_FILE_PATH, std::ios::app);
+        file << '\n' << '\n';
+    }
+    else{
+        file.open(OUT_FILE_PATH);
+    }
+	if (!file.is_open())
+		exit(NOT_OPEN); 
+    if (!hasShift && !makeHessenberg){
+        file << "QR method without shifts and without Hessenberg transform. :" << '\n';
+        file << "Eigen values of matrix: " << eigList << '\n';
+        file << "Number of iterations: " << numOfIterations;
+    }
+    if (hasShift && !makeHessenberg){
+        file << "QR method with shifts and without Hessenberg transform. :" << '\n';
+        file << "Eigen values of matrix: " << eigList << '\n';
+        file << "Number of iterations: " << numOfIterations;
+    }
+    if (!hasShift && makeHessenberg){
+        file << "QR method without shifts and with Hessenberg transform. :" << '\n';
+        file << "Eigen values of matrix: " << eigList << '\n';
+        file << "Number of iterations: " << numOfIterations;
+    }
+    if (hasShift && makeHessenberg){
+        file << "QR method with shifts and with Hessenberg transform. :" << '\n';
+        file << "Eigen values of matrix: " << eigList << '\n';
+        file << "Number of iterations: " << numOfIterations;
+    }
+	file.close();
+	return IS_CLOSED;
+}
 
 

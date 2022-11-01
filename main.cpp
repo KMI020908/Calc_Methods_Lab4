@@ -6,33 +6,36 @@
 
 // Процедура проверки алгоритмов
 template<typename Type>
-void checkTest(std::vector<std::vector<Type>> &lCoefSys, std::vector<Type> &rCoefSys, const std::vector<Type> &startPoint,
-const std::string &IN_FILE_PATH, Type accuracy = 1e-7){
-    // Считываем данные
-    readData<Type>(lCoefSys, rCoefSys, IN_FILE_PATH);
+void checkTest(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigList,
+const std::string &IN_FILE_PATH, const std::string &QR_OUT_FILE_PATH, Type accuracy = 1e-6){
+    // QR метод
+    std::size_t numOfIters = 0;
+    readMatrix<Type>(matrix, IN_FILE_PATH);
+    numOfIters = findEigenNumsQRMethod<Type>(matrix, eigList, accuracy, 0);
+    writeEigenData<Type>(numOfIters, eigList, QR_OUT_FILE_PATH, false, false, false);
+    
+    readMatrix<Type>(matrix, IN_FILE_PATH);
+    numOfIters = findEigenNumsQRMethod<Type>(matrix, eigList, accuracy, 1);
+    writeEigenData<Type>(numOfIters, eigList, QR_OUT_FILE_PATH, true, false, true);
 
+    readMatrix<Type>(matrix, IN_FILE_PATH);
+    numOfIters = findEigenNumsQRMethodHessenberg<Type>(matrix, eigList, accuracy, 1);
+    writeEigenData<Type>(numOfIters, eigList, QR_OUT_FILE_PATH, false, true, true);
+
+    readMatrix<Type>(matrix, IN_FILE_PATH);
+    numOfIters = findEigenNumsQRMethodHessenberg<Type>(matrix, eigList, accuracy, 1);
+    writeEigenData<Type>(numOfIters, eigList, QR_OUT_FILE_PATH, true, true, true);
 }
 
 template<typename Type>
 void temp_main(){
-    std::vector<std::vector<Type>> A; // Матрица левых коэффициентов
-    std::vector<Type> b; // Вектор правых коэффициентов
+    std::vector<std::vector<Type>> matrix; 
     std::vector<Type> eigList;
-    std::vector<std::vector<Type>> Q;
-    readMatrix(A, IN_FILE_PATH_3);
-    std::cout << findEigenNumsQRMethod(A, eigList, 1e-6, 0) << '\n';
-    std::cout << eigList << '\n';
-    readMatrix(A, IN_FILE_PATH_3);
-    std::cout << findEigenNumsQRMethod(A, eigList, 1e-6, 1) << '\n';
-    std::cout << eigList << '\n';
-    readMatrix(A, IN_FILE_PATH_3);
-    std::cout << findEigenNumsQRMethodHessenberg(A, eigList, 1e-6, 0) << '\n';
-    std::cout << eigList << '\n';
-    readMatrix(A, IN_FILE_PATH_3);
-    std::cout << findEigenNumsQRMethodHessenberg(A, eigList, 1e-6, 1) << '\n';
-    std::cout << eigList << '\n';
-    
+    checkTest(matrix, eigList, IN_FILE_PATH_1, QR_OUT_FILE_PATH_1);
+    checkTest(matrix, eigList, IN_FILE_PATH_2, QR_OUT_FILE_PATH_2);
+    checkTest(matrix, eigList, IN_FILE_PATH_3, QR_OUT_FILE_PATH_3);
 }
+
 int main(){
     temp_main<double>();
     return 0;
