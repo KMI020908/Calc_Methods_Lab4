@@ -31,11 +31,15 @@ void temp_main(){
     findQMatrix3Diag(A, Q);
     std::cout << '\n' << '\n';
     std::cout << Q;
+    std::cout << '\n' << '\n';
+    std::cout << A;
     readData(A, b, IN_FILE_PATH_1);
     getHessenbergMatrix(A);
     findQMatrix(A, Q);
     std::cout << '\n' << '\n';
     std::cout << Q;
+    std::cout << '\n' << '\n';
+    std::cout << A;
 }
 
 int main(){

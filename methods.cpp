@@ -241,27 +241,46 @@ QUADRATIC_FLAG findQMatrix3Diag(std::vector<std::vector<Type>> &matrix, std::vec
         Q[i][i] = 1.0;
     }
     // k < rows - 2
-    for (std::size_t k = 0; k < rows - 1; k++){
-            if (std::abs(matrix[k + 1][k]) >= accuracy){
-                Type c = matrix[k][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
-                Type s = matrix[k + 1][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
-                for (std::size_t j = 0; j < cols; j++){
-                    Type temp = Q[k][j];
-                    Q[k][j] = c * Q[k][j] + s * Q[k + 1][j];
-                    Q[k + 1][j] = -s * temp + c * Q[k + 1][j];
-                    if (std::abs(Q[k + 1][j]) < accuracy)
-                        Q[k + 1][j] = 0.0;
-                }
-                for (std::size_t j = k; j < ; j++){
-                    Type temp = matrix[k][j];
-                    matrix[k][j] = c * matrix[k][j] + s * matrix[k + 1][j];
-                    matrix[k + 1][j] = -s * temp + c * matrix[k + 1][j];
-                    if (std::abs(matrix[k + 1][j]) < accuracy)
-                        matrix[k + 1][j] = 0.0;
-                }
+    for (std::size_t k = 0; k < rows - 2; k++){
+        if (std::abs(matrix[k + 1][k]) >= accuracy){
+            Type c = matrix[k][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+            Type s = matrix[k + 1][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+            for (std::size_t j = 0; j < cols; j++){
+                Type temp = Q[k][j];
+                Q[k][j] = c * Q[k][j] + s * Q[k + 1][j];
+                Q[k + 1][j] = -s * temp + c * Q[k + 1][j];
+                if (std::abs(Q[k + 1][j]) < accuracy)
+                    Q[k + 1][j] = 0.0;
             }
+            for (std::size_t j = k; j < k + 3; j++){
+                Type temp = matrix[k][j];
+                matrix[k][j] = c * matrix[k][j] + s * matrix[k + 1][j];
+                matrix[k + 1][j] = -s * temp + c * matrix[k + 1][j];
+                if (std::abs(matrix[k + 1][j]) < accuracy)
+                    matrix[k + 1][j] = 0.0;
+            }
+        }
     }
-    // k = rows - 1
+    // k = rows - 2
+    std::size_t k = rows - 2;
+    if (std::abs(matrix[k + 1][k]) >= accuracy){
+        Type c = matrix[k][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+        Type s = matrix[k + 1][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+        for (std::size_t j = 0; j < cols; j++){
+            Type temp = Q[k][j];
+            Q[k][j] = c * Q[k][j] + s * Q[k + 1][j];
+            Q[k + 1][j] = -s * temp + c * Q[k + 1][j];
+            if (std::abs(Q[k + 1][j]) < accuracy)
+                Q[k + 1][j] = 0.0;
+        }
+        for (std::size_t j = k; j < cols; j++){
+            Type temp = matrix[k][j];
+            matrix[k][j] = c * matrix[k][j] + s * matrix[k + 1][j];
+            matrix[k + 1][j] = -s * temp + c * matrix[k + 1][j];
+            if (std::abs(matrix[k + 1][j]) < accuracy)
+                matrix[k + 1][j] = 0.0;
+        }
+    }
     transposeMatrix(Q);
     return IS_QUADRATIC;
 }
