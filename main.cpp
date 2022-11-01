@@ -20,10 +20,10 @@ void temp_main(){
     std::vector<Type> b; // Вектор правых коэффициентов
     std::vector<Type> eigList;
     readData(A, b, IN_FILE_PATH_1);
-    std::cout << findEigenNumsQRMethodClassic(A, eigList, 1e-6) << '\n';
+    std::cout << findEigenNumsQRMethod(A, eigList, 1e-6, 0) << '\n';
     std::cout << eigList << '\n';
     readData(A, b, IN_FILE_PATH_1);
-    std::cout << findEigenNumsQRMethodShift(A, eigList, 1e-6) << '\n';
+    std::cout << findEigenNumsQRMethod(A, eigList, 1e-6, 1) << '\n';
     std::cout << eigList << '\n';
     readData(A, b, IN_FILE_PATH_1);
     getHessenbergMatrix(A);

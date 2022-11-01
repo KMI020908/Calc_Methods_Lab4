@@ -153,10 +153,7 @@ Type findNormOfErrAfterEstIt_REL(const std::vector<std::vector<Type>> &lCoefs, c
 const std::vector<Type> &firstVec, std::vector<Type> &solution, std::vector<Type> &rightSolution, Type bound, Type tao, Type accuracy, double p, std::size_t stopIt = SIZE_MAX);
 
 template <typename Type>
-std::size_t findEigenNumsQRMethodClassic(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy = 1e-6);
-
-template <typename Type>
-std::size_t findEigenNumsQRMethodShift(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy = 1e-6);
+std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy = 1e-6, bool hasShift = false);
 
 template <typename Type>
 QUADRATIC_FLAG getHessenbergMatrix(std::vector<std::vector<Type>> &matrix, Type accuracy = 1e-6, bool isSymmetric = false);
