@@ -16,7 +16,6 @@ Type accuracy = 1e-7){
 
 template<typename Type>
 void temp_main(){
-
     std::vector<std::vector<Type>> A; // Матрица левых коэффициентов
     std::vector<Type> b; // Вектор правых коэффициентов
     std::vector<Type> eigList;
@@ -26,6 +25,10 @@ void temp_main(){
     readData(A, b, IN_FILE_PATH_1);
     std::cout << findEigenNumsQRMethodShift(A, eigList, 1e-6) << '\n';
     std::cout << eigList << '\n';
+    readData(A, b, IN_FILE_PATH_1);
+    getHessenbergMatrix(A);
+    std::cout << '\n';
+    std::cout << A;
 }
 
 int main(){

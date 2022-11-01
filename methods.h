@@ -158,4 +158,7 @@ std::size_t findEigenNumsQRMethodClassic(std::vector<std::vector<Type>> &matrix,
 template <typename Type>
 std::size_t findEigenNumsQRMethodShift(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy = 1e-6);
 
+template <typename Type>
+QUADRATIC_FLAG getHessenbergMatrix(std::vector<std::vector<Type>> &matrix, Type accuracy = 1e-6, bool isSymmetric = false);
+
 #endif

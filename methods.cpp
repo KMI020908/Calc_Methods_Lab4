@@ -1366,7 +1366,7 @@ const std::vector<Type> &firstVec, std::vector<Type> &solution, std::vector<Type
 }
 
 // Лаба 3
-template <typename Type>
+template<typename Type>
 std::size_t findEigenNumsQRMethodClassic(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy){
     std::size_t numOfIters = 0; // Количество итераций
     std::size_t rows = matrix.size();
@@ -1436,7 +1436,7 @@ std::size_t findEigenNumsQRMethodClassic(std::vector<std::vector<Type>> &matrix,
     return numOfIters;
 }
 
-template <typename Type>
+template<typename Type>
 std::size_t findEigenNumsQRMethodShift(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy){
     std::size_t numOfIters = 0; // Количество итераций
     std::size_t rows = matrix.size();
@@ -1512,4 +1512,54 @@ std::size_t findEigenNumsQRMethodShift(std::vector<std::vector<Type>> &matrix, s
         }
     }
     return numOfIters;
+}
+
+template<typename Type>
+QUADRATIC_FLAG getHessenbergMatrix(std::vector<std::vector<Type>> &matrix, Type accuracy, bool isSymmetric){
+    std::size_t rows = matrix.size(); // Количество строк в СЛАУ
+    std::size_t cols = 0;
+    if (rows != 0)
+        cols = matrix[0].size();
+    else
+        return NOT_QUADRATIC;
+    if (rows != cols)
+        return NOT_QUADRATIC;
+    if (!isSymmetric){
+        for (std::size_t k = 1; k < rows; k++){
+            for (std::size_t i = k + 1; i < rows; i++){
+                if (std::abs(matrix[i][k - 1]) >= accuracy){
+                    Type c = matrix[k][k - 1] / std::sqrt(matrix[k][k - 1] * matrix[k][k - 1] + matrix[i][k - 1] * matrix[i][k - 1]);
+                    Type s = matrix[i][k - 1] / std::sqrt(matrix[k][k - 1] * matrix[k][k - 1] + matrix[i][k - 1] * matrix[i][k - 1]);
+                    for (std::size_t j = k - 1; j < cols; j++){
+                        Type temp = matrix[k][j];
+                        matrix[k][j] = c * matrix[k][j] + s * matrix[i][j];
+                        matrix[i][j] = -s * temp + c * matrix[i][j];
+                    }
+                    for (std::size_t j = k - 1; j < rows; j++){
+                        Type temp = matrix[j][k];
+                        matrix[j][k] = c * matrix[j][k] + s * matrix[j][i];
+                        matrix[j][i] = -s * temp + c * matrix[j][i];
+                    }
+                }
+            }
+        }    
+    }
+    else{
+       for (std::size_t k = 1; k < rows; k++){
+            for (std::size_t i = k + 1; i < rows; i++){
+                if (std::abs(matrix[i][k - 1]) >= accuracy){
+                    Type c = matrix[k][k - 1] / std::sqrt(matrix[k][k - 1] * matrix[k][k - 1] + matrix[i][k - 1] * matrix[i][k - 1]);
+                    Type s = matrix[i][k - 1] / std::sqrt(matrix[k][k - 1] * matrix[k][k - 1] + matrix[i][k - 1] * matrix[i][k - 1]);
+                    for (std::size_t j = k - 1; j < cols; j++){
+                        Type temp = matrix[k][j];
+                        matrix[k][j] = c * matrix[k][j] + s * matrix[i][j];
+                        matrix[j][k] = matrix[k][j];
+                        matrix[i][j] = -s * temp + c * matrix[i][j];
+                        matrix[j][i] = matrix[i][j];
+                    }
+                }
+            }
+        } 
+    }
+    return IS_QUADRATIC;
 }
