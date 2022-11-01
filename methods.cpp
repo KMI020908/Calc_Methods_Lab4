@@ -1599,7 +1599,6 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
                 R[i][j] = matrix[i][j];
             }
         }
-        // Нахождение QR разложения для трехдиагональной матрицы
         findQMatrix3Diag(R, Q, accuracy);
         for (std::size_t i = 0; i < rows; i++){
             for (std::size_t j = 0; j < cols; j++){

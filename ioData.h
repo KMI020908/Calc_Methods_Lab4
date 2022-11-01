@@ -19,6 +19,9 @@ FILE_FLAG writeData(const std::vector<Type> &solution, const std::vector<Type> &
 Type tao = 0.0, Type omega = 0.0);
 
 template<typename Type>
+FILE_FLAG readMatrix(std::vector<std::vector<Type>> &matrix, const std::string& IN_FILE_PATH);
+
+template<typename Type>
 FILE_FLAG addData(const std::vector<Type> &solution, const std::vector<Type> &startPoint, Type accuracy, const std::string& OUT_FILE_PATH, std::size_t numOfIt, 
 Type tao = 0.0, Type omega = 0.0);
 
