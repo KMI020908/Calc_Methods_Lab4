@@ -169,6 +169,6 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
 
 template<typename Type>
 std::size_t invertItersMethod(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &eigenMatrix, const std::vector<Type> &startEigenList,
-Type accuracy = 1e-6, Type omega = 1.0);
+Type accuracy = 1e-6);
 
 #endif
