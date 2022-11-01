@@ -506,7 +506,7 @@ bool hasShift, bool makeHessenberg, bool add){
 }
 
 template<typename Type>
-FILE_FLAG writeEigenVec(std::vector<std::vector<Type>> &eigMatrix, std::vector<Type> &eigList, const std::string& OUT_FILE_PATH, 
+FILE_FLAG writeEigenVec(std::size_t numOfIters, std::vector<std::vector<Type>> &eigMatrix, std::vector<Type> &eigList, const std::string& OUT_FILE_PATH, 
 bool add){
 	std::ofstream file;
     if (add){
@@ -517,7 +517,8 @@ bool add){
         file.open(OUT_FILE_PATH);
     }
 	if (!file.is_open())
-		exit(NOT_OPEN); 
+		exit(NOT_OPEN);
+    file << "Number of iterations: " << numOfIters << '\n' << '\n'; 
     std::size_t rows = eigMatrix.size();
     for (std::size_t i = 0; i < rows; i++){
         file << "Eigen number: " << eigList[i] << " ----> " << "Eigen vector: " << eigMatrix[i] << '\n' << '\n';

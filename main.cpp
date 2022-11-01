@@ -29,10 +29,8 @@ const std::string &IN_FILE_PATH, const std::string &QR_OUT_FILE_PATH, const std:
     writeEigenData<Type>(numOfIters, eigList, QR_OUT_FILE_PATH, true, true, true);
 
     readMatrix<Type>(matrix, IN_FILE_PATH);
-    invertItersMethod(matrix, eigMatrix, eigList, accuracy, 0.1);
-    writeEigenVec(eigMatrix, eigList, I_OUT_FILE_PATH);
-
-
+    numOfIters = invertItersMethod(matrix, eigMatrix, eigList, accuracy, 0.1);
+    writeEigenVec(numOfIters, eigMatrix, eigList, I_OUT_FILE_PATH);
 }
 
 template<typename Type>
