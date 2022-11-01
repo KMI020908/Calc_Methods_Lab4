@@ -1644,6 +1644,7 @@ Type accuracy, Type omega){
         }  
     }
     std::vector<Type> startPoint(rows, 0.0);
+    //getHessenbergMatrix(matrix, accuracy);
     for (std::size_t i = 0; i < rows; i++){
         eigenVec[0] = 1.0;
         for (std::size_t k = 1; k < rows; k++){
@@ -1666,4 +1667,34 @@ Type accuracy, Type omega){
         eigenMatrix.push_back(eigenVec);
     }
     return numOfIters;
+}
+
+template<typename Type>
+SOLUTION_FLAG tridiagonalAlgoritm(std::vector<std::vector<Type>> &lCoefs, std::vector<Type> &rCoefs, std::vector<Type> &solution){
+    std::size_t rows = lCoefs.size(); // Количество строк в СЛАУ
+    solution.resize(rows); // Искомое решение
+    std::size_t cols = 0;
+    if (rows != 0)
+        cols = lCoefs[0].size();
+    else
+        return NO_SOLUTION;
+    solution.resize(rows, 0.0);
+    std::vector<Type> alpha, beta;
+
+    alpha.push_back(-lCoefs[0][1] / lCoefs[0][0]);
+    beta.push_back(rCoefs[0] / lCoefs[0][0]);
+
+    for (std::size_t i = 1; i < rows - 1; i++){
+        Type coef = lCoefs[i][i - 1] * alpha[i - 1] + lCoefs[i][i];
+        alpha.push_back(-lCoefs[i][i + 1] / coef);
+        beta.push_back((rCoefs[i] - lCoefs[i][i - 1] * beta[i - 1]) / coef);
+    }
+    beta.push_back(
+        (rCoefs[rows - 1] - lCoefs[rows - 1][rows - 2] * beta[rows - 2]) / (lCoefs[rows - 1][rows - 2] * alpha[rows - 2] + lCoefs[rows - 1][rows - 1])
+    );
+    solution[rows - 1] = beta[rows - 1];
+    for (int i = rows - 2; i >= 0; i--){
+        solution[i] = alpha[i] * solution[i + 1] + beta[i];
+    }
+    return HAS_SOLUTION;
 }

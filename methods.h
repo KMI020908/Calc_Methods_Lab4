@@ -20,6 +20,9 @@ SOLUTION_FLAG qrMethod(std::vector<std::vector<Type>> &lCoefs, std::vector<Type>
 Type accuracy = 1e-7);
 
 template<typename Type>
+SOLUTION_FLAG tridiagonalAlgoritm(std::vector<std::vector<Type>> &lCoefs, std::vector<Type> &rCoefs, std::vector<Type> &solution);
+
+template<typename Type>
 std::size_t simpleItMethod(const std::vector<std::vector<Type>> &lCoefs, const std::vector<Type> &rCoefs, const std::vector<Type> 
 &firstVec, std::vector<Type> &solution, Type tao, Type accuracy = 1e-7, double p = 2.0, Type epsilon_0 = 1e-4, std::size_t stopIt = 100000);
 

@@ -43,6 +43,13 @@ void temp_main(){
 }
 
 int main(){
-    temp_main<double>();
+    //temp_main<double>();
+    std::vector<std::vector<double>> lCoefs; 
+    std::vector<double> rCoefs;
+    readData(lCoefs, rCoefs, IN_FILE_PATH_3);
+    std::vector<double> sol;
+    tridiagonalAlgoritm(lCoefs, rCoefs, sol);
+    std::cout << sol;
+
     return 0;
 }
