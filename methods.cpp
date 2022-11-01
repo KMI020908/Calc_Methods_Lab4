@@ -1637,6 +1637,7 @@ Type accuracy, Type omega){
     std::vector<Type> prevEigenVec(rows);
     std::vector<Type> eigenVec(rows);
     std::vector<std::vector<Type>> lambdaMatrix(rows);
+    getHessenbergMatrix(matrix, accuracy); // Заранее приводим к симметричному виду, чтобы было быстрее считать систему
     for (std::size_t i = 0; i < cols; i++){
         lambdaMatrix[i].resize(cols, 0.0);
         for (std::size_t j = 0; j < cols; j++){
@@ -1644,7 +1645,6 @@ Type accuracy, Type omega){
         }  
     }
     std::vector<Type> startPoint(rows, 0.0);
-    //getHessenbergMatrix(matrix, accuracy);
     for (std::size_t i = 0; i < rows; i++){
         eigenVec[0] = 1.0;
         for (std::size_t k = 1; k < rows; k++){
@@ -1657,7 +1657,8 @@ Type accuracy, Type omega){
             for (std::size_t k = 0; k < rows; k++){
                 prevEigenVec[k] = eigenVec[k];
             }
-            relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
+            tridiagonalAlgoritm(lambdaMatrix, prevEigenVec, eigenVec);
+            //relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
             Type normOfEigVec = normOfVector(eigenVec);
             for (std::size_t k = 0; k < rows; k++){
                 eigenVec[k] /= normOfEigVec;
@@ -1670,7 +1671,7 @@ Type accuracy, Type omega){
 }
 
 template<typename Type>
-SOLUTION_FLAG tridiagonalAlgoritm(std::vector<std::vector<Type>> &lCoefs, std::vector<Type> &rCoefs, std::vector<Type> &solution){
+SOLUTION_FLAG tridiagonalAlgoritm(const std::vector<std::vector<Type>> &lCoefs, const std::vector<Type> &rCoefs, std::vector<Type> &solution){
     std::size_t rows = lCoefs.size(); // Количество строк в СЛАУ
     solution.resize(rows); // Искомое решение
     std::size_t cols = 0;
