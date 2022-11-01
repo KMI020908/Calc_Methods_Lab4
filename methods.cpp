@@ -221,6 +221,52 @@ QUADRATIC_FLAG findQMatrix(std::vector<std::vector<Type>> &lCoefs, std::vector<s
 }
 
 template<typename Type>
+QUADRATIC_FLAG findQMatrix3Diag(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &Q, Type accuracy){
+    std::size_t rows = matrix.size(); // Количество строк в СЛАУ
+    std::size_t cols = 0;
+    if (rows != 0)
+        cols = matrix[0].size();
+    else
+        return NOT_QUADRATIC;
+    if (rows != cols)
+        return NOT_QUADRATIC;
+    Q.resize(rows);
+    for (std::size_t i = 0; i < rows; i++){
+        Q[i].resize(cols);
+        for (std::size_t j = 0; j < cols; j++){
+            Q[i][j] = 0.0;   
+        }
+    }
+    for (std::size_t i = 0; i < rows; i++){
+        Q[i][i] = 1.0;
+    }
+    // k < rows - 2
+    for (std::size_t k = 0; k < rows - 1; k++){
+            if (std::abs(matrix[k + 1][k]) >= accuracy){
+                Type c = matrix[k][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+                Type s = matrix[k + 1][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+                for (std::size_t j = 0; j < cols; j++){
+                    Type temp = Q[k][j];
+                    Q[k][j] = c * Q[k][j] + s * Q[k + 1][j];
+                    Q[k + 1][j] = -s * temp + c * Q[k + 1][j];
+                    if (std::abs(Q[k + 1][j]) < accuracy)
+                        Q[k + 1][j] = 0.0;
+                }
+                for (std::size_t j = k; j < ; j++){
+                    Type temp = matrix[k][j];
+                    matrix[k][j] = c * matrix[k][j] + s * matrix[k + 1][j];
+                    matrix[k + 1][j] = -s * temp + c * matrix[k + 1][j];
+                    if (std::abs(matrix[k + 1][j]) < accuracy)
+                        matrix[k + 1][j] = 0.0;
+                }
+            }
+    }
+    // k = rows - 1
+    transposeMatrix(Q);
+    return IS_QUADRATIC;
+}
+
+template<typename Type>
 std::size_t transposeMatrix(std::vector<std::vector<Type>> &matrix){
     std::size_t rows = matrix.size();
     std::size_t cols = 0;
@@ -1500,85 +1546,6 @@ QUADRATIC_FLAG getHessenbergMatrix(std::vector<std::vector<Type>> &matrix, Type 
     return IS_QUADRATIC;
 }
 
-
-template<typename Type>
-std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift){
-    std::size_t numOfIters = 0; // Количество итераций
-    std::size_t rows = matrix.size();
-    std::size_t cols = 0;
-    if (rows != 0)
-        cols = matrix[0].size();
-    else
-        return numOfIters; 
-    eigenList.resize(rows, 0.0);
-    std::size_t eigenRow = rows - 1; // Строка в которой по итогу вращений должно получиться собственное значение
-    std::vector<std::vector<Type>> Q;
-    std::vector<std::vector<Type>> R;
-    R.resize(rows);
-    for (std::size_t i = 0; i < rows; i++){
-        R[i].resize(cols, 0.0);
-    }
-    ///////////////////////////////////////////////////////////////////////////////
-    std::string IN_FILE_PATH_4 = "D:\\Calc_Methods\\Lab3\\Tests\\test4.txt";
-    std::string IN_FILE_PATH_5 = "D:\\Calc_Methods\\Lab3\\Tests\\test5.txt";
-    std::string IN_FILE_PATH_6 = "D:\\Calc_Methods\\Lab3\\Tests\\test6.txt";
-    ///////////////////////////////////////////////////////////////////////////////
-    while (eigenRow != 0){
-        numOfIters++;
-        ///////////////////////////////////////////////////        
-        writeMatrixFile(matrix, IN_FILE_PATH_4);
-        ///////////////////////////////////////////////////
-        // Сдвиг
-        Type shift = matrix[eigenRow][eigenRow];
-        for (std::size_t i = 0; i < rows; i++){
-            matrix[i][i] -= shift; 
-        }
-        for (std::size_t i = 0; i < rows; i++){
-            for (std::size_t j = 0; j < cols; j++){
-                R[i][j] = matrix[i][j];
-            }
-        }
-        findQMatrix(R, Q, accuracy);
-        ///////////////////////////////////////////////////////////
-        writeMatrixFile(Q, IN_FILE_PATH_5);
-        writeMatrixFile(R, IN_FILE_PATH_6);
-        //////////////////////////////////////////////////////////
-        for (std::size_t i = 0; i < rows; i++){
-            for (std::size_t j = 0; j < cols; j++){
-                Type sum = 0.0;
-                for (std::size_t k = i; k < rows; k++){
-                    sum += R[i][k] * Q[k][j];
-                }
-                matrix[i][j] = sum;
-            }
-        }
-        for (std::size_t i = 0; i < rows; i++){
-            matrix[i][i] += shift; 
-        }
-        Type sumOfEigenRow = 0.0;
-        for (std::size_t j = 0; j < eigenRow; j++){
-            sumOfEigenRow += std::abs(matrix[eigenRow][j]);
-        }
-        if (sumOfEigenRow < accuracy){
-            eigenList[eigenRow] = matrix[eigenRow][eigenRow]; 
-            for (std::size_t i = 0; i < eigenRow; i++){
-                Q[i].resize(eigenRow);
-                R[i].resize(eigenRow);
-            }
-            Q.resize(eigenRow);
-            R.resize(eigenRow);
-            eigenRow--;
-            rows--;
-            cols--;
-        }
-        if (eigenRow == 0){
-            eigenList[eigenRow] = matrix[eigenRow][eigenRow];
-            break;
-        }
-    }
-    return numOfIters;
-}
-
 template<typename Type>
 std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift){
     std::size_t numOfIters = 0; // Количество итераций
@@ -1601,9 +1568,6 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
     getHessenbergMatrix(matrix, accuracy);
     while (eigenRow != 0){
         numOfIters++;
-        ///////////////////////////////////////////////////        
-        writeMatrixFile(matrix, IN_FILE_PATH_4);
-        ///////////////////////////////////////////////////
         // Сдвиг
         if (hasShift){
             shift = matrix[eigenRow][eigenRow];
@@ -1617,29 +1581,7 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
             }
         }
         // Нахождение QR разложения для трехдиагональной матрицы
-
-        findQMatrix(R, Q, accuracy);
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
+        findQMatrix3Diag(R, Q, accuracy);
         for (std::size_t i = 0; i < rows; i++){
             for (std::size_t j = 0; j < cols; j++){
                 Type sum = 0.0;
