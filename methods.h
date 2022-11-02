@@ -168,7 +168,14 @@ template<typename Type>
 std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift);
 
 template<typename Type>
-std::size_t invertItersMethod(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &eigenMatrix, const std::vector<Type> &startEigenList,
-Type accuracy = 1e-6);
+std::size_t invertItersMethod(const std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &eigenMatrix, const std::vector<Type> &startEigenList,
+Type accuracy = 1e-6, Type omega = 1.0);
+
+template<typename Type>
+Type invertItersMethodRayleigh(const std::vector<std::vector<Type>> &matrix, std::vector<Type> &startVec, 
+std::vector<Type> &eigenVec, Type accuracy, Type omega);
+
+template<typename Type>
+Type dot(const std::vector<Type> &v1, const std::vector<Type> &v2);
 
 #endif

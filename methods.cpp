@@ -1654,8 +1654,8 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
 }
 
 template<typename Type>
-std::size_t invertItersMethod(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &eigenMatrix, const std::vector<Type> &startEigenList,
-Type accuracy){
+std::size_t invertItersMethod(const std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &eigenMatrix, const std::vector<Type> &startEigenList,
+Type accuracy, Type omega){
     std::size_t numOfIters = 0; // Количество итераций
     std::size_t rows = matrix.size();
     std::size_t cols = 0;
@@ -1667,7 +1667,6 @@ Type accuracy){
     std::vector<Type> prevEigenVec(rows);
     std::vector<Type> eigenVec(rows);
     std::vector<std::vector<Type>> lambdaMatrix(rows);
-    getHessenbergMatrix(matrix, accuracy);
     for (std::size_t i = 0; i < cols; i++){
         lambdaMatrix[i].resize(cols, 0.0);
         for (std::size_t j = 0; j < cols; j++){
@@ -1687,7 +1686,7 @@ Type accuracy){
             for (std::size_t k = 0; k < rows; k++){
                 prevEigenVec[k] = eigenVec[k];
             }
-            tridiagonalAlgoritm(lambdaMatrix, prevEigenVec, eigenVec);
+            relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
             Type normOfEigVec = normOfVector(eigenVec);
             for (std::size_t k = 0; k < rows; k++){
                 eigenVec[k] /= normOfEigVec;
@@ -1699,3 +1698,71 @@ Type accuracy){
     return numOfIters;
 }
 
+template<typename Type>
+Type invertItersMethodRayleigh(const std::vector<std::vector<Type>> &matrix, std::vector<Type> &startVec, 
+std::vector<Type> &eigenVec, Type accuracy, Type omega){
+    std::size_t numOfIters = 0; // Количество итераций
+    Type eigenApprox = 0.0;
+    std::size_t rows = matrix.size();
+    std::size_t cols = 0;
+    if (rows != 0)
+        cols = matrix[0].size();
+    else
+        return NAN;
+    if (startVec.size() != rows){
+        startVec.resize(rows, 1.0);
+    }
+    std::vector<std::vector<Type>> lambdaMatrix(rows);
+    for (std::size_t i = 0; i < cols; i++){
+        lambdaMatrix[i].resize(cols, 0.0);
+        for (std::size_t j = 0; j < cols; j++){
+            lambdaMatrix[i][j] = matrix[i][j];
+        }  
+    }
+    eigenVec.resize(rows, 0.0);
+    for (std::size_t k = 0; k < rows; k++){
+        eigenVec[k] = startVec[k];
+    }
+    Type normOfEigVec = normOfVector(eigenVec);
+    if (std::abs(normOfEigVec - 1) > accuracy){
+        for (std::size_t k = 0; k < rows; k++){
+            eigenVec[k] /= normOfEigVec;
+        }
+    }
+    std::vector<Type> prevEigenVec(rows, 0.0);
+    std::vector<Type> startPoint(rows, 0.0);
+    while (normOfVector(eigenVec - prevEigenVec) > accuracy && normOfVector(eigenVec + prevEigenVec) > accuracy){
+        for (std::size_t k = 0; k < rows; k++){
+            prevEigenVec[k] = eigenVec[k];
+        }
+        eigenApprox = dot(matrix * prevEigenVec, prevEigenVec);
+        for (std::size_t k = 0; k < rows; k++){
+            lambdaMatrix[k][k] = matrix[k][k] - eigenApprox;
+        }
+        relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
+        normOfEigVec = normOfVector(eigenVec);
+        for (std::size_t k = 0; k < rows; k++){
+            eigenVec[k] /= normOfEigVec;
+        }
+        numOfIters++;
+    }
+    return eigenApprox;
+}
+
+template<typename Type>
+Type dot(const std::vector<Type> &v1, const std::vector<Type> &v2){
+    std::size_t size1 = v1.size();
+    std::size_t size2 = v2.size();
+    std::size_t minSize = 0;
+    if (size1 < size2){
+        minSize = size1;
+    }
+    else{
+        minSize = size2;
+    }
+    Type sum = 0.0;
+    for (std::size_t i = 0; i < minSize; i++){
+        sum += v1[i] * v2[i];
+    }
+    return sum;
+}
