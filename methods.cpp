@@ -316,6 +316,50 @@ QUADRATIC_FLAG findQMatrix3Diag(std::vector<std::vector<Type>> &matrix, std::vec
 }
 
 template<typename Type>
+QUADRATIC_FLAG findQMatrixHess(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &Q, Type accuracy){
+    std::size_t rows = matrix.size(); // Количество строк в СЛАУ
+    std::size_t cols = 0;
+    if (rows != 0)
+        cols = matrix[0].size();
+    else
+        return NOT_QUADRATIC;
+    if (rows != cols)
+        return NOT_QUADRATIC;
+    Q.resize(rows);
+    for (std::size_t i = 0; i < rows; i++){
+        Q[i].resize(cols);
+        for (std::size_t j = 0; j < cols; j++){
+            Q[i][j] = 0.0;   
+        }
+    }
+    for (std::size_t i = 0; i < rows; i++){
+        Q[i][i] = 1.0;
+    }
+    for (std::size_t k = 0; k < rows - 1; k++){
+        if (std::abs(matrix[k + 1][k]) >= accuracy){
+            Type c = matrix[k][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+            Type s = matrix[k + 1][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+            for (std::size_t j = 0; j < cols; j++){
+                Type temp = Q[k][j];
+                Q[k][j] = c * Q[k][j] + s * Q[k + 1][j];
+                Q[k + 1][j] = -s * temp + c * Q[k + 1][j];
+                if (std::abs(Q[k + 1][j]) < accuracy)
+                    Q[k + 1][j] = 0.0;
+            }
+            for (std::size_t j = k; j < cols; j++){
+                Type temp = matrix[k][j];
+                matrix[k][j] = c * matrix[k][j] + s * matrix[k + 1][j];
+                matrix[k + 1][j] = -s * temp + c * matrix[k + 1][j];
+                if (std::abs(matrix[k + 1][j]) < accuracy)
+                    matrix[k + 1][j] = 0.0;
+            }
+        }
+    }
+    transposeMatrix(Q);
+    return IS_QUADRATIC;
+}
+
+template<typename Type>
 std::size_t transposeMatrix(std::vector<std::vector<Type>> &matrix){
     std::size_t rows = matrix.size();
     std::size_t cols = 0;
@@ -799,6 +843,24 @@ std::vector<std::vector<Type>> operator*(Type num, const std::vector<std::vector
         res.push_back(tempVec);
     }
     return res;
+}
+
+template<typename Type>
+Type dot(const std::vector<Type> &v1, const std::vector<Type> &v2){
+    std::size_t size1 = v1.size();
+    std::size_t size2 = v2.size();
+    std::size_t minSize = 0;
+    if (size1 < size2){
+        minSize = size1;
+    }
+    else{
+        minSize = size2;
+    }
+    Type sum = 0.0;
+    for (std::size_t i = 0; i < minSize; i++){
+        sum += v1[i] * v2[i];
+    }
+    return sum;
 }
 
 template<typename Type>
@@ -1584,7 +1646,7 @@ QUADRATIC_FLAG getHessenbergMatrix(std::vector<std::vector<Type>> &matrix, Type 
 }
 
 template<typename Type>
-std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift){
+std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift, bool isSymmetric){
     std::size_t numOfIters = 0; // Количество итераций
     Type shift = 0.0; // Сдвиг
     std::size_t rows = matrix.size();
@@ -1602,7 +1664,7 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
         R[i].resize(cols, 0.0);
     }
     // Приводим к матрице Хессенберга
-    getHessenbergMatrix(matrix, accuracy);
+    getHessenbergMatrix(matrix, accuracy, isSymmetric);
     while (eigenRow != 0){
         numOfIters++;
         // Сдвиг
@@ -1617,7 +1679,12 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
                 R[i][j] = matrix[i][j];
             }
         }
-        findQMatrix3Diag(R, Q, accuracy);
+        if (isSymmetric){
+            findQMatrix3Diag(R, Q, accuracy);
+        }
+        else{
+            findQMatrixHess(R, Q, accuracy);;
+        }
         for (std::size_t i = 0; i < rows; i++){
             for (std::size_t j = 0; j < cols; j++){
                 Type sum = 0.0;
@@ -1655,7 +1722,7 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
 
 template<typename Type>
 std::size_t invertItersMethod(const std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &eigenMatrix, const std::vector<Type> &startEigenList,
-Type accuracy, Type omega){
+Type accuracy, bool is3Diag, Type omega){
     std::size_t numOfIters = 0; // Количество итераций
     std::size_t rows = matrix.size();
     std::size_t cols = 0;
@@ -1679,6 +1746,7 @@ Type accuracy, Type omega){
         for (std::size_t k = 1; k < rows; k++){
             eigenVec[k] = 0.0;
         }
+        //eigenVec = { 0.175032, -0.154008, -0.0218063, -0.972198 };
         for (std::size_t k = 0; k < rows; k++){
             lambdaMatrix[k][k] = matrix[k][k] - startEigenList[i];
         }
@@ -1686,7 +1754,12 @@ Type accuracy, Type omega){
             for (std::size_t k = 0; k < rows; k++){
                 prevEigenVec[k] = eigenVec[k];
             }
-            relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
+            if (!is3Diag){
+                relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
+            }
+            else{
+                tridiagonalAlgoritm(lambdaMatrix, prevEigenVec, eigenVec);
+            }
             Type normOfEigVec = normOfVector(eigenVec);
             for (std::size_t k = 0; k < rows; k++){
                 eigenVec[k] /= normOfEigVec;
@@ -1700,7 +1773,7 @@ Type accuracy, Type omega){
 
 template<typename Type>
 Type invertItersMethodRayleigh(const std::vector<std::vector<Type>> &matrix, std::vector<Type> &startVec, 
-std::vector<Type> &eigenVec, Type accuracy, Type omega){
+std::vector<Type> &eigenVec, Type accuracy, bool is3Diag, Type omega){
     std::size_t numOfIters = 0; // Количество итераций
     Type eigenApprox = 0.0;
     std::size_t rows = matrix.size();
@@ -1739,7 +1812,12 @@ std::vector<Type> &eigenVec, Type accuracy, Type omega){
         for (std::size_t k = 0; k < rows; k++){
             lambdaMatrix[k][k] = matrix[k][k] - eigenApprox;
         }
-        relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
+        if (!is3Diag){
+            relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
+        }
+        else{
+            tridiagonalAlgoritm(lambdaMatrix, prevEigenVec, eigenVec);
+        }
         normOfEigVec = normOfVector(eigenVec);
         for (std::size_t k = 0; k < rows; k++){
             eigenVec[k] /= normOfEigVec;
@@ -1747,22 +1825,4 @@ std::vector<Type> &eigenVec, Type accuracy, Type omega){
         numOfIters++;
     }
     return eigenApprox;
-}
-
-template<typename Type>
-Type dot(const std::vector<Type> &v1, const std::vector<Type> &v2){
-    std::size_t size1 = v1.size();
-    std::size_t size2 = v2.size();
-    std::size_t minSize = 0;
-    if (size1 < size2){
-        minSize = size1;
-    }
-    else{
-        minSize = size2;
-    }
-    Type sum = 0.0;
-    for (std::size_t i = 0; i < minSize; i++){
-        sum += v1[i] * v2[i];
-    }
-    return sum;
 }

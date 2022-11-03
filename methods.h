@@ -46,6 +46,9 @@ template<typename Type>
 QUADRATIC_FLAG findQMatrix3Diag(std::vector<std::vector<Type>> &lCoefs, std::vector<std::vector<Type>> &Q, Type accuracy = 1e-6);
 
 template<typename Type>
+QUADRATIC_FLAG findQMatrixHess(std::vector<std::vector<Type>> &lCoefs, std::vector<std::vector<Type>> &Q, Type accuracy = 1e-6);
+
+template<typename Type>
 Type findResidual(const std::vector<std::vector<Type>> &lCoefs, const std::vector<Type> &rCoefs, const std::vector<Type> &solution); // Найти невязку
 
 template<typename Type>
@@ -114,6 +117,9 @@ template<typename Type>
 std::vector<Type> operator*(Type num, const std::vector<Type> &vec);
 
 template<typename Type>
+Type dot(const std::vector<Type> &v1, const std::vector<Type> &v2);
+
+template<typename Type>
 QUADRATIC_FLAG findCanonicalFormSimpleIt(const std::vector<std::vector<Type>> &lCoefs, 
 const std::vector<Type> &rCoefs, std::vector<std::vector<Type>> &C, std::vector<Type> &y, Type tao);
 
@@ -165,17 +171,15 @@ template <typename Type>
 QUADRATIC_FLAG getHessenbergMatrix(std::vector<std::vector<Type>> &matrix, Type accuracy = 1e-6, bool isSymmetric = false);
 
 template<typename Type>
-std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift);
+std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift, bool isSymmetric = false);
 
 template<typename Type>
 std::size_t invertItersMethod(const std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &eigenMatrix, const std::vector<Type> &startEigenList,
-Type accuracy = 1e-6, Type omega = 1.0);
+Type accuracy = 1e-6, bool is3Diag = false, Type omega = 1.0);
 
 template<typename Type>
 Type invertItersMethodRayleigh(const std::vector<std::vector<Type>> &matrix, std::vector<Type> &startVec, 
-std::vector<Type> &eigenVec, Type accuracy, Type omega);
+std::vector<Type> &eigenVec, Type accuracy = 1e-6, bool is3Diag = false, Type omega = 1.0);
 
-template<typename Type>
-Type dot(const std::vector<Type> &v1, const std::vector<Type> &v2);
 
 #endif

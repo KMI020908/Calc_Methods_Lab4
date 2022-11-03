@@ -29,11 +29,11 @@ const std::string &IN_FILE_PATH, const std::string &QR_OUT_FILE_PATH, const std:
     writeEigenData<Type>(numOfIters, eigList, QR_OUT_FILE_PATH, true, true, true);
 
     readMatrix<Type>(matrix, IN_FILE_PATH);
-    numOfIters = invertItersMethod(matrix, eigMatrix, eigList, accuracy, 0.2);
+    numOfIters = invertItersMethod(matrix, eigMatrix, eigList, accuracy, false, 0.2);
     writeEigenVec(numOfIters, eigMatrix, eigList, I_OUT_FILE_PATH);
     std::vector<Type> eigVec1;
     std::vector<Type> startVec = { 0.777976, 0.582499, -0.229449, 0.0529363 };
-    Type lambda1 = invertItersMethodRayleigh(matrix, startVec, eigVec1, accuracy, 0.2);
+    Type lambda1 = invertItersMethodRayleigh(matrix, startVec, eigVec1, accuracy, false, 0.2);
     std::cout << "Eigen number: " << lambda1 << " ----> " << "Eigen vector: " << eigVec1 << '\n' << '\n';
 
     //writeEigenVec(numOfIters, startVec, eigVec1, I_OUT_FILE_PATH, true);
@@ -46,6 +46,9 @@ void temp_main(){
     checkTest(matrix, eigList, IN_FILE_PATH_1, QR_OUT_FILE_PATH_1, I_OUT_FILE_PATH_1);
     //checkTest(matrix, eigList, IN_FILE_PATH_2, QR_OUT_FILE_PATH_2, I_OUT_FILE_PATH_2);
     //checkTest(matrix, eigList, IN_FILE_PATH_3, QR_OUT_FILE_PATH_3, I_OUT_FILE_PATH_3);
+
+
+    // Бассейн Ньютона 
 }
 
 int main(){
