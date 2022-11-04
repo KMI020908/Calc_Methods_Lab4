@@ -55,7 +55,9 @@ void temp_main(){
     //writeNewthonSwPool(matrix, 0.02, I_OUT_FILE_PATH_4, 1e-6, true);
 
     // Матрица опрератора дифференцирования
-    std::size_t dim = 40;
+    //std::size_t dim = 10;
+    //std::size_t dim = 50;
+    std::size_t dim = 115;
     Type h = 1e-4;
     Type c = -1 / (h * h);
     std::vector<std::vector<Type>> matrix2;
@@ -72,6 +74,7 @@ void temp_main(){
         matrix2[i][i + 1] = 1.0 * c;
         matrix2[i][i - 1] = matrix2[i][i + 1];
     }
+    writeMatrixFile(matrix2, IN_FILE_PATH_5);
     std::vector<Type> startVec(dim, 1.0);
     std::vector<Type> eigVec;
     Type lambda = invertItersMethodRayleigh(matrix2, startVec, eigVec, accuracy, true);
@@ -91,6 +94,8 @@ void temp_main(){
     }
     numOfIters = invertItersMethod(matrix2, eigMatrix, eigList, accuracy, true);
     writeEigenVec(numOfIters, eigMatrix, eigList, I_OUT_FILE_PATH_5);
+    writeVectorFile(eigList, IN_FILE_PATH_8);
+    writeMatrixFile(eigMatrix, IN_FILE_PATH_9);
 }
 
 int main(){

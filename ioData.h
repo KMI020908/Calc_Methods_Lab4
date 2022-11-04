@@ -35,7 +35,10 @@ template<typename Type>
 FILE_FLAG writeQRMatrix(const std::vector<std::vector<Type>> &Q, const std::vector<std::vector<Type>> &R, const std::string& OUT_FILE_PATH);
 
 template<typename Type>
-FILE_FLAG writeMatrixFile(const std::vector<std::vector<Type>> &matrix, const std::string& OUT_FILE_PATH, bool add = 0);
+FILE_FLAG writeMatrixFile(const std::vector<std::vector<Type>> &matrix, const std::string& OUT_FILE_PATH, bool add = false);
+
+template<typename Type>
+FILE_FLAG writeVectorFile(const std::vector<Type> &vector, const std::string& OUT_FILE_PATH, bool add = false);
 
 template<typename Type>
 FILE_FLAG writeResidual(Type residual, const std::string& OUT_FILE_PATH);

@@ -219,6 +219,31 @@ FILE_FLAG writeMatrixFile(const std::vector<std::vector<Type>> &matrix, const st
 } 
 
 template<typename Type>
+FILE_FLAG writeVectorFile(const std::vector<Type> &vector, const std::string& OUT_FILE_PATH, bool add){
+    std::ofstream file;
+	if (add){
+        file.open(OUT_FILE_PATH, std::ios::app);
+        file << '\n' << '\n';
+    }
+    else{
+        file.open(OUT_FILE_PATH);
+    }
+	if (!file.is_open())
+		exit(NOT_OPEN);
+    std::size_t rows = vector.size();
+    if (rows == 0){
+        file.close();
+        return IS_CLOSED;
+    }
+    for (std::size_t i = 0; i < rows - 1; i++){
+        file << vector[i] << '\n';
+    }
+     file << vector[rows - 1];
+    file.close();
+    return IS_CLOSED;
+} 
+
+template<typename Type>
 FILE_FLAG writeResidual(Type residual, const std::string& OUT_FILE_PATH){
 	std::ofstream file;
 	file.open(OUT_FILE_PATH, std::ios::app);
@@ -526,4 +551,3 @@ bool add){
 	file.close();
 	return IS_CLOSED;
 }
-
