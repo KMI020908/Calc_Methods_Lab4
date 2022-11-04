@@ -1775,7 +1775,6 @@ template<typename Type>
 Type invertItersMethodRayleigh(const std::vector<std::vector<Type>> &matrix, std::vector<Type> &startVec, 
 std::vector<Type> &eigenVec, Type accuracy, bool is3Diag, Type omega){
     std::size_t numOfIters = 0; // Количество итераций
-    Type eigenApprox = 0.0;
     std::size_t rows = matrix.size();
     std::size_t cols = 0;
     if (rows != 0)
@@ -1797,23 +1796,24 @@ std::vector<Type> &eigenVec, Type accuracy, bool is3Diag, Type omega){
         eigenVec[k] = startVec[k];
     }
     Type normOfEigVec = normOfVector(eigenVec);
-    if (std::abs(normOfEigVec - 1) > accuracy){
+    if (std::abs(normOfEigVec - 1.0) > accuracy){
         for (std::size_t k = 0; k < rows; k++){
             eigenVec[k] /= normOfEigVec;
         }
     }
     std::vector<Type> prevEigenVec(rows, 0.0);
     std::vector<Type> startPoint(rows, 0.0);
+    Type eigenApprox = dot(matrix * eigenVec, eigenVec);
+    for (std::size_t k = 0; k < rows; k++){
+        lambdaMatrix[k][k] = matrix[k][k] - eigenApprox;
+    }
     while (normOfVector(eigenVec - prevEigenVec) > accuracy && normOfVector(eigenVec + prevEigenVec) > accuracy){
         for (std::size_t k = 0; k < rows; k++){
             prevEigenVec[k] = eigenVec[k];
         }
-        eigenApprox = dot(matrix * prevEigenVec, prevEigenVec);
-        for (std::size_t k = 0; k < rows; k++){
-            lambdaMatrix[k][k] = matrix[k][k] - eigenApprox;
-        }
         if (!is3Diag){
             relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
+            //gaussMethodFull(lambdaMatrix, prevEigenVec, eigenVec, accuracy);
         }
         else{
             tridiagonalAlgoritm(lambdaMatrix, prevEigenVec, eigenVec);
@@ -1822,7 +1822,40 @@ std::vector<Type> &eigenVec, Type accuracy, bool is3Diag, Type omega){
         for (std::size_t k = 0; k < rows; k++){
             eigenVec[k] /= normOfEigVec;
         }
+        eigenApprox = dot(matrix * prevEigenVec, prevEigenVec);
+        for (std::size_t k = 0; k < rows; k++){
+            lambdaMatrix[k][k] = matrix[k][k] - eigenApprox;
+        }
         numOfIters++;
     }
     return eigenApprox;
+}
+
+template<typename Type>
+FILE_FLAG writeNewthonSwPool(const std::vector<std::vector<Type>> &matrix, Type step, const std::string& OUT_FILE_PATH, 
+Type accuracy, bool is3Diag, Type omega){
+    std::ofstream file;
+	file.open(OUT_FILE_PATH);
+	if (!file.is_open())
+		exit(NOT_OPEN);
+    if (matrix.size() != 3){
+        return IS_CLOSED;
+    }
+    Type teta = 0.05;
+    std::vector<Type> startVec(3, 0.0);
+    std::vector<Type> eigVec;
+    while (teta <= M_PI){
+        Type phi = 0.0;
+        while (phi <= 2 * M_PI){
+            startVec[0] = sin(teta) * cos(phi);
+            startVec[1] = sin(teta) * sin(phi);
+            startVec[2] = cos(teta);
+            Type lambda = invertItersMethodRayleigh(matrix, startVec, eigVec, accuracy, is3Diag, omega);
+            file << startVec[0] << '\t' << startVec[1] << '\t' << startVec[2] << '\t' << lambda << '\n';
+            phi += step;
+        }
+        teta += step;
+    }
+    file.close();
+    return IS_CLOSED;
 }

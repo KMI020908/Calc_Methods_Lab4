@@ -171,15 +171,18 @@ template <typename Type>
 QUADRATIC_FLAG getHessenbergMatrix(std::vector<std::vector<Type>> &matrix, Type accuracy = 1e-6, bool isSymmetric = false);
 
 template<typename Type>
-std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift, bool isSymmetric = false);
+std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy = 1e-6, bool hasShift = true, bool isSymmetric = false);
 
 template<typename Type>
 std::size_t invertItersMethod(const std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &eigenMatrix, const std::vector<Type> &startEigenList,
-Type accuracy = 1e-6, bool is3Diag = false, Type omega = 1.0);
+Type accuracy = 1e-6, bool is3Diag = false, Type omega = 0.2);
 
 template<typename Type>
 Type invertItersMethodRayleigh(const std::vector<std::vector<Type>> &matrix, std::vector<Type> &startVec, 
-std::vector<Type> &eigenVec, Type accuracy = 1e-6, bool is3Diag = false, Type omega = 1.0);
+std::vector<Type> &eigenVec, Type accuracy = 1e-6, bool is3Diag = false, Type omega = 0.2);
 
+template<typename Type>
+FILE_FLAG writeNewthonSwPool(const std::vector<std::vector<Type>> &matrix, Type step, const std::string& OUT_FILE_PATH, 
+Type accuracy = 1e-6, bool is3Diag = false, Type omega = 0.2);
 
 #endif
