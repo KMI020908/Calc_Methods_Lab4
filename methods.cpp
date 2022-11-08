@@ -1679,7 +1679,7 @@ const std::vector<Type> &firstVec, std::vector<Type> &solution, std::vector<Type
 
 // Лаба 3
 template<typename Type>
-std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift){
+std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::vector<Type> &eigenList, Type accuracy, bool hasShift, bool is3Diag){
     std::size_t numOfIters = 0; // Количество итераций
     Type shift = 0.0; // Сдвиг
     std::size_t rows = matrix.size();
@@ -1710,7 +1710,12 @@ std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::v
                 R[i][j] = matrix[i][j];
             }
         }
-        findQBlock(R, Q, rows, accuracy);
+        if (!is3Diag){
+            findQBlock(R, Q, rows, accuracy);
+        }
+        else{
+            findQBlock3Diag(R, Q, rows, accuracy);
+        }
         for (std::size_t i = 0; i < rows; i++){
             for (std::size_t j = 0; j < cols; j++){
                 Type sum = 0.0;
@@ -1746,7 +1751,7 @@ std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::v
 
 template<typename Type>
 QUADRATIC_FLAG getHessenbergMatrix(std::vector<std::vector<Type>> &matrix, Type accuracy, bool isSymmetric){
-    std::size_t rows = matrix.size(); // Количество строк в СЛАУ
+    std::size_t rows = matrix.size(); 
     std::size_t cols = 0;
     if (rows != 0)
         cols = matrix[0].size();
@@ -1956,7 +1961,6 @@ std::vector<Type> &eigenVec, Type accuracy, bool is3Diag, Type omega){
         }
         if (!is3Diag){
             relaxationMethod(lambdaMatrix, prevEigenVec, startPoint, eigenVec, accuracy, omega);
-            //gaussMethodFull(lambdaMatrix, prevEigenVec, eigenVec, accuracy);
         }
         else{
             tridiagonalAlgoritm(lambdaMatrix, prevEigenVec, eigenVec);

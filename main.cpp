@@ -36,7 +36,6 @@ bool is3Diag = false){
     std::vector<Type> startVec = { 1.0, 1.0, 1.0 };
     Type lambda1 = invertItersMethodRayleigh(matrix, startVec, eigVec1, accuracy, is3Diag, 1.0);
     std::cout << "Eigen number: " << lambda1 << " ----> " << "Eigen vector: " << eigVec1 << '\n' << '\n';
-
     //writeEigenVec(numOfIters, startVec, eigVec1, I_OUT_FILE_PATH, true);
 }
 
@@ -47,12 +46,14 @@ void temp_main(){
     Type accuracy = 1e-6;
     checkTest(matrix, eigList, IN_FILE_PATH_1, QR_OUT_FILE_PATH_1, I_OUT_FILE_PATH_1, accuracy);
     checkTest(matrix, eigList, IN_FILE_PATH_2, QR_OUT_FILE_PATH_2, I_OUT_FILE_PATH_2, accuracy);
-    //checkTest(matrix, eigList, IN_FILE_PATH_3, QR_OUT_FILE_PATH_3, I_OUT_FILE_PATH_3, accuracy, true);
+    checkTest(matrix, eigList, IN_FILE_PATH_3, QR_OUT_FILE_PATH_3, I_OUT_FILE_PATH_3, accuracy, true);
 
+    /*
     // Бассейн Ньютона
     readMatrix(matrix, IN_FILE_PATH_3);
     findEigenNumsQRMethodHessenberg(matrix, eigList);
-    writeNewthonSwPool(matrix, 0.1, I_OUT_FILE_PATH_4, 1e-6, true);
+    writeNewthonSwPool(matrix, 0.02, I_OUT_FILE_PATH_4, 1e-6, true);
+    */
 
     /*
     // Матрица опрератора дифференцирования
