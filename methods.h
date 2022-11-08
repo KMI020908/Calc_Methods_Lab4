@@ -43,10 +43,19 @@ template<typename Type>
 QUADRATIC_FLAG findQMatrix(std::vector<std::vector<Type>> &lCoefs, std::vector<std::vector<Type>> &Q, Type accuracy = 1e-6);
 
 template<typename Type>
+QUADRATIC_FLAG findQBlock(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &Q, std::size_t rows, Type accuracy = 1e-6);
+
+template<typename Type>
 QUADRATIC_FLAG findQMatrix3Diag(std::vector<std::vector<Type>> &lCoefs, std::vector<std::vector<Type>> &Q, Type accuracy = 1e-6);
 
 template<typename Type>
+QUADRATIC_FLAG findQBlock3Diag(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &Q, std::size_t rows, Type accuracy = 1e-6);
+
+template<typename Type>
 QUADRATIC_FLAG findQMatrixHess(std::vector<std::vector<Type>> &lCoefs, std::vector<std::vector<Type>> &Q, Type accuracy = 1e-6);
+
+template<typename Type>
+QUADRATIC_FLAG findQBlockHess(std::vector<std::vector<Type>> &lCoefs, std::vector<std::vector<Type>> &Q, std::size_t rows, Type accuracy = 1e-6);
 
 template<typename Type>
 Type findResidual(const std::vector<std::vector<Type>> &lCoefs, const std::vector<Type> &rCoefs, const std::vector<Type> &solution); // Найти невязку

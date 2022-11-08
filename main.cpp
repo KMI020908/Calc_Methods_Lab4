@@ -45,15 +45,16 @@ void temp_main(){
     std::vector<std::vector<Type>> matrix; 
     std::vector<Type> eigList;
     Type accuracy = 1e-6;
-    //checkTest(matrix, eigList, IN_FILE_PATH_1, QR_OUT_FILE_PATH_1, I_OUT_FILE_PATH_1, accuracy);
-    //checkTest(matrix, eigList, IN_FILE_PATH_2, QR_OUT_FILE_PATH_2, I_OUT_FILE_PATH_2, accuracy);
-    checkTest(matrix, eigList, IN_FILE_PATH_3, QR_OUT_FILE_PATH_3, I_OUT_FILE_PATH_3, accuracy, true);
+    checkTest(matrix, eigList, IN_FILE_PATH_1, QR_OUT_FILE_PATH_1, I_OUT_FILE_PATH_1, accuracy);
+    checkTest(matrix, eigList, IN_FILE_PATH_2, QR_OUT_FILE_PATH_2, I_OUT_FILE_PATH_2, accuracy);
+    //checkTest(matrix, eigList, IN_FILE_PATH_3, QR_OUT_FILE_PATH_3, I_OUT_FILE_PATH_3, accuracy, true);
 
     // Бассейн Ньютона
-    //readMatrix(matrix, IN_FILE_PATH_3);
-    //findEigenNumsQRMethodHessenberg(matrix, eigList);
-    //writeNewthonSwPool(matrix, 0.02, I_OUT_FILE_PATH_4, 1e-6, true);
+    readMatrix(matrix, IN_FILE_PATH_3);
+    findEigenNumsQRMethodHessenberg(matrix, eigList);
+    writeNewthonSwPool(matrix, 0.1, I_OUT_FILE_PATH_4, 1e-6, true);
 
+    /*
     // Матрица опрератора дифференцирования
     //std::size_t dim = 10;
     //std::size_t dim = 50;
@@ -96,6 +97,7 @@ void temp_main(){
     writeEigenVec(numOfIters, eigMatrix, eigList, I_OUT_FILE_PATH_5);
     writeVectorFile(eigList, IN_FILE_PATH_8);
     writeMatrixFile(eigMatrix, IN_FILE_PATH_9);
+    */
 }
 
 int main(){

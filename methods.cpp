@@ -206,7 +206,7 @@ SOLUTION_FLAG qrMethod(std::vector<std::vector<Type>> &lCoefs, std::vector<Type>
 
 template<typename Type>
 QUADRATIC_FLAG findQMatrix(std::vector<std::vector<Type>> &lCoefs, std::vector<std::vector<Type>> &Q, Type accuracy){
-    std::size_t rows = lCoefs.size(); // Количество строк в СЛАУ
+    std::size_t rows = lCoefs.size();
     std::size_t cols = 0;
     if (rows != 0)
         cols = lCoefs[0].size();
@@ -251,8 +251,54 @@ QUADRATIC_FLAG findQMatrix(std::vector<std::vector<Type>> &lCoefs, std::vector<s
 }
 
 template<typename Type>
+QUADRATIC_FLAG findQBlock(std::vector<std::vector<Type>> &lCoefs, std::vector<std::vector<Type>> &Q, std::size_t rows, Type accuracy){
+    std::size_t cols = 0;
+    if (rows != 0)
+        cols = rows;
+    else
+        return NOT_QUADRATIC;
+    if (lCoefs.size() < rows){
+        return NOT_QUADRATIC;
+    }
+    Q.resize(rows);
+    for (std::size_t i = 0; i < rows; i++){
+        Q[i].resize(cols);
+        for (std::size_t j = 0; j < cols; j++){
+            Q[i][j] = 0.0;   
+        }
+    }
+    for (std::size_t i = 0; i < rows; i++){
+        Q[i][i] = 1.0;
+    }
+    for (std::size_t k = 0; k < rows; k++){
+        for (std::size_t i = k + 1; i < rows; i++){
+            if (std::abs(lCoefs[i][k]) >= accuracy){
+                Type c = lCoefs[k][k]/std::sqrt(lCoefs[k][k] * lCoefs[k][k] + lCoefs[i][k] * lCoefs[i][k]);
+                Type s = lCoefs[i][k]/std::sqrt(lCoefs[k][k] * lCoefs[k][k] + lCoefs[i][k] * lCoefs[i][k]);
+                for (std::size_t j = 0; j < cols; j++){
+                    Type temp = Q[k][j];
+                    Q[k][j] = c * Q[k][j] + s * Q[i][j];
+                    Q[i][j] = -s * temp + c * Q[i][j];
+                    if (std::abs(Q[i][j]) < accuracy)
+                        Q[i][j] = 0.0;
+                }
+                for (std::size_t j = k; j < cols; j++){
+                    Type temp = lCoefs[k][j];
+                    lCoefs[k][j] = c * lCoefs[k][j] + s * lCoefs[i][j];
+                    lCoefs[i][j] = -s * temp + c * lCoefs[i][j];
+                    if (std::abs(lCoefs[i][j]) < accuracy)
+                        lCoefs[i][j] = 0.0;
+                }
+            }
+        }
+    }
+    transposeMatrix(Q);
+    return IS_QUADRATIC;
+}
+
+template<typename Type>
 QUADRATIC_FLAG findQMatrix3Diag(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &Q, Type accuracy){
-    std::size_t rows = matrix.size(); // Количество строк в СЛАУ
+    std::size_t rows = matrix.size();
     std::size_t cols = 0;
     if (rows != 0)
         cols = matrix[0].size();
@@ -260,6 +306,71 @@ QUADRATIC_FLAG findQMatrix3Diag(std::vector<std::vector<Type>> &matrix, std::vec
         return NOT_QUADRATIC;
     if (rows != cols)
         return NOT_QUADRATIC;
+    Q.resize(rows);
+    for (std::size_t i = 0; i < rows; i++){
+        Q[i].resize(cols);
+        for (std::size_t j = 0; j < cols; j++){
+            Q[i][j] = 0.0;   
+        }
+    }
+    for (std::size_t i = 0; i < rows; i++){
+        Q[i][i] = 1.0;
+    }
+    // k < rows - 2
+    for (std::size_t k = 0; k < rows - 2; k++){
+        if (std::abs(matrix[k + 1][k]) >= accuracy){
+            Type c = matrix[k][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+            Type s = matrix[k + 1][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+            for (std::size_t j = 0; j < cols; j++){
+                Type temp = Q[k][j];
+                Q[k][j] = c * Q[k][j] + s * Q[k + 1][j];
+                Q[k + 1][j] = -s * temp + c * Q[k + 1][j];
+                if (std::abs(Q[k + 1][j]) < accuracy)
+                    Q[k + 1][j] = 0.0;
+            }
+            for (std::size_t j = k; j < k + 3; j++){
+                Type temp = matrix[k][j];
+                matrix[k][j] = c * matrix[k][j] + s * matrix[k + 1][j];
+                matrix[k + 1][j] = -s * temp + c * matrix[k + 1][j];
+                if (std::abs(matrix[k + 1][j]) < accuracy)
+                    matrix[k + 1][j] = 0.0;
+            }
+        }
+    }
+    // k = rows - 2
+    std::size_t k = rows - 2;
+    if (std::abs(matrix[k + 1][k]) >= accuracy){
+        Type c = matrix[k][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+        Type s = matrix[k + 1][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+        for (std::size_t j = 0; j < cols; j++){
+            Type temp = Q[k][j];
+            Q[k][j] = c * Q[k][j] + s * Q[k + 1][j];
+            Q[k + 1][j] = -s * temp + c * Q[k + 1][j];
+            if (std::abs(Q[k + 1][j]) < accuracy)
+                Q[k + 1][j] = 0.0;
+        }
+        for (std::size_t j = k; j < cols; j++){
+            Type temp = matrix[k][j];
+            matrix[k][j] = c * matrix[k][j] + s * matrix[k + 1][j];
+            matrix[k + 1][j] = -s * temp + c * matrix[k + 1][j];
+            if (std::abs(matrix[k + 1][j]) < accuracy)
+                matrix[k + 1][j] = 0.0;
+        }
+    }
+    transposeMatrix(Q);
+    return IS_QUADRATIC;
+}
+
+template<typename Type>
+QUADRATIC_FLAG findQBlock3Diag(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &Q, std::size_t rows, Type accuracy){
+    std::size_t cols = 0;
+    if (rows != 0)
+        cols = rows;
+    else
+        return NOT_QUADRATIC;
+    if (matrix.size() < rows){
+        return NOT_QUADRATIC;
+    }    
     Q.resize(rows);
     for (std::size_t i = 0; i < rows; i++){
         Q[i].resize(cols);
@@ -325,6 +436,50 @@ QUADRATIC_FLAG findQMatrixHess(std::vector<std::vector<Type>> &matrix, std::vect
         return NOT_QUADRATIC;
     if (rows != cols)
         return NOT_QUADRATIC;
+    Q.resize(rows);
+    for (std::size_t i = 0; i < rows; i++){
+        Q[i].resize(cols);
+        for (std::size_t j = 0; j < cols; j++){
+            Q[i][j] = 0.0;   
+        }
+    }
+    for (std::size_t i = 0; i < rows; i++){
+        Q[i][i] = 1.0;
+    }
+    for (std::size_t k = 0; k < rows - 1; k++){
+        if (std::abs(matrix[k + 1][k]) >= accuracy){
+            Type c = matrix[k][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+            Type s = matrix[k + 1][k]/std::sqrt(matrix[k][k] * matrix[k][k] + matrix[k + 1][k] * matrix[k + 1][k]);
+            for (std::size_t j = 0; j < cols; j++){
+                Type temp = Q[k][j];
+                Q[k][j] = c * Q[k][j] + s * Q[k + 1][j];
+                Q[k + 1][j] = -s * temp + c * Q[k + 1][j];
+                if (std::abs(Q[k + 1][j]) < accuracy)
+                    Q[k + 1][j] = 0.0;
+            }
+            for (std::size_t j = k; j < cols; j++){
+                Type temp = matrix[k][j];
+                matrix[k][j] = c * matrix[k][j] + s * matrix[k + 1][j];
+                matrix[k + 1][j] = -s * temp + c * matrix[k + 1][j];
+                if (std::abs(matrix[k + 1][j]) < accuracy)
+                    matrix[k + 1][j] = 0.0;
+            }
+        }
+    }
+    transposeMatrix(Q);
+    return IS_QUADRATIC;
+}
+
+template<typename Type>
+QUADRATIC_FLAG findQBlockHess(std::vector<std::vector<Type>> &matrix, std::vector<std::vector<Type>> &Q, std::size_t rows, Type accuracy){
+    std::size_t cols = 0;
+    if (rows != 0)
+        cols = rows;
+    else
+        return NOT_QUADRATIC;
+    if (matrix.size() < rows){
+        return NOT_QUADRATIC;
+    }
     Q.resize(rows);
     for (std::size_t i = 0; i < rows; i++){
         Q[i].resize(cols);
@@ -1555,7 +1710,7 @@ std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::v
                 R[i][j] = matrix[i][j];
             }
         }
-        findQMatrix(R, Q, accuracy);
+        findQBlock(R, Q, rows, accuracy);
         for (std::size_t i = 0; i < rows; i++){
             for (std::size_t j = 0; j < cols; j++){
                 Type sum = 0.0;
@@ -1577,12 +1732,6 @@ std::size_t findEigenNumsQRMethod(std::vector<std::vector<Type>> &matrix, std::v
         }
         if (sumOfEigenRow < accuracy){
             eigenList[eigenRow] = matrix[eigenRow][eigenRow]; 
-            for (std::size_t i = 0; i < eigenRow; i++){
-                Q[i].resize(eigenRow);
-                R[i].resize(eigenRow);
-            }
-            Q.resize(eigenRow);
-            R.resize(eigenRow);
             eigenRow--;
             rows--;
             cols--;
@@ -1680,10 +1829,10 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
             }
         }
         if (isSymmetric){
-            findQMatrix3Diag(R, Q, accuracy);
+            findQBlock3Diag(R, Q, rows, accuracy);
         }
         else{
-            findQMatrixHess(R, Q, accuracy);;
+            findQBlockHess(R, Q, rows, accuracy);;
         }
         for (std::size_t i = 0; i < rows; i++){
             for (std::size_t j = 0; j < cols; j++){
@@ -1701,13 +1850,7 @@ std::size_t findEigenNumsQRMethodHessenberg(std::vector<std::vector<Type>> &matr
             }
         }
         if (std::abs(matrix[eigenRow][eigenRow - 1]) < accuracy){
-            eigenList[eigenRow] = matrix[eigenRow][eigenRow]; 
-            for (std::size_t i = 0; i < eigenRow; i++){
-                Q[i].resize(eigenRow);
-                R[i].resize(eigenRow);
-            }
-            Q.resize(eigenRow);
-            R.resize(eigenRow);
+            eigenList[eigenRow] = matrix[eigenRow][eigenRow];
             eigenRow--;
             rows--;
             cols--;
