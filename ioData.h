@@ -74,7 +74,7 @@ FILE_FLAG writeExactIters(std::size_t exactIterations, const std::string& OUT_FI
 
 // Лаба 3
 template<typename Type>
-FILE_FLAG writeEigenData(std::size_t numOfIterations, std::vector<Type> &eigList, std::string& OUT_FILE_PATH, 
+FILE_FLAG writeEigenData(std::size_t numOfIterations, std::vector<Type> &eigList, const std::string& OUT_FILE_PATH, 
 bool hasShift = false, bool makeHessenberg = false, bool add = false);
 
 template<typename Type>

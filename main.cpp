@@ -55,11 +55,10 @@ void temp_main(){
     writeNewthonSwPool(matrix, 0.02, I_OUT_FILE_PATH_4, 1e-6, true);
     */
 
-    /*
     // Матрица опрератора дифференцирования
-    //std::size_t dim = 10;
+    std::size_t dim = 10;
     //std::size_t dim = 50;
-    std::size_t dim = 115;
+    //std::size_t dim = 115;
     Type h = 1e-4;
     Type c = -1 / (h * h);
     std::vector<std::vector<Type>> matrix2;
@@ -77,13 +76,8 @@ void temp_main(){
         matrix2[i][i - 1] = matrix2[i][i + 1];
     }
     writeMatrixFile(matrix2, IN_FILE_PATH_5);
-    std::vector<Type> startVec(dim, 1.0);
-    std::vector<Type> eigVec;
-    Type lambda = invertItersMethodRayleigh(matrix2, startVec, eigVec, accuracy, true);
-    std::cout << "Eigen number: " << lambda << " ----> " << "Eigen vector: " << eigVec << '\n' << '\n';
-
     std::vector<std::vector<Type>> eigMatrix;
-    std::size_t numOfIters = findEigenNumsQRMethodHessenberg(matrix2, eigList, accuracy, false, true);
+    std::size_t numOfIters = findEigenNumsQRMethod(matrix2, eigList, accuracy, true, true);
     writeEigenData<Type>(numOfIters, eigList, QR_OUT_FILE_PATH_5, true, true, false);
     matrix2[0][0] = -2.0 * c;
     matrix2[0][1] = 1.0 * c;
@@ -98,7 +92,7 @@ void temp_main(){
     writeEigenVec(numOfIters, eigMatrix, eigList, I_OUT_FILE_PATH_5);
     writeVectorFile(eigList, IN_FILE_PATH_8);
     writeMatrixFile(eigMatrix, IN_FILE_PATH_9);
-    */
+    
 }
 
 int main(){
